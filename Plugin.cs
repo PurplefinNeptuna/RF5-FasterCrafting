@@ -2,7 +2,6 @@
 using BepInEx.Logging;
 using BepInEx.IL2CPP;
 using HarmonyLib;
-using UnityEngine;
 
 namespace FasterCrafting {
 	[BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
@@ -61,7 +60,7 @@ namespace FasterCrafting {
 
 			[HarmonyPatch(typeof(UICraftResult), "Update")]
 			[HarmonyPostfix]
-			public static void ResultUpdate(UICraftResult __instance) {
+			public static void ResultUpdate() {
 				if (strengthMenu != null && success != null && cursor != null) {
 					if (!success.IsDone() && !startAnim) {
 						startAnim = true;
