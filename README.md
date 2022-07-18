@@ -10,6 +10,9 @@
 - Pressing `[Camp Menu]` (default Keyboard = Tab, DS4 = Start) will make you pressing ok button instantly.
 - After upgrading item, it will try to move back the cursor (hand) back to item slot for the last item used.
 
+![upgrade](https://user-images.githubusercontent.com/23467102/179445472-6eb14fc4-094a-4634-b35e-c324f96b29fe.gif)
+
+
 ## Known issues
 Non-Fatal:
 - `[Error  :FasterCrafting] Failed to find success Component!` always thrown when you open upgrade/craft menu, caused by some UI is not created yet.
