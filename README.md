@@ -3,7 +3,8 @@
 
 ## Installation
 - Install this [RF5Fix mod](https://github.com/Lyall/RF5Fix) (BepInEx included there).
-- Put this mod dll to `BepInEx\plugins`.
+- Download this mod [here.](https://github.com/PurplefinNeptuna/RF5-FasterCrafting/releases)
+- Extract FasterCrafting.zip file to `<GameDirectory>\BepInEx\plugins`.
 
 ## What this mod do
 - Pressing `[Camp Menu]` (default Keyboard = Tab, DS4 = Start) will make you pressing ok button instantly.
