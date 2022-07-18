@@ -32,49 +32,52 @@ namespace FasterCrafting {
 			public static UICraftSuccess success = null;
 			public static CursorController cursor = null;
 			public static CursorLinker lastSelect = null;
-			public static CursorLinker okBtn = null;
-			public static bool canSkip = false;
+			public static ButtonWorkBase okBtn = null;
+			//public static bool canSkip = false;
 			public static bool startSynthAnim = false;
+			public static bool startResultAnim = false;
 			public static bool doneUpgrade = false;
 			public static SynthMode synthMode = SynthMode.NONE;
 
-			public static void TrytoSearch(SynthMode mode) {
+			public static bool TrytoSearch(SynthMode mode) {
 				CursorLinkConnector parent;
 				switch (mode) {
 					case SynthMode.CRAFT: {
 							parent = craftMenu;
-							okBtn = parent.GetComponentInChildren<UICraftSynthesisOK>(true)?.GetComponent<ButtonLinker>();
+							okBtn = parent.GetComponentInChildren<UICraftSynthesisOK>(true);
 							if (okBtn == null) {
 								Log.LogError("Failed to find OK Button!");
-								return;
+								return false;
 							}
 							break;
 						}
 					case SynthMode.UPGRADE: {
 							parent = strengthMenu;
-							okBtn = parent.GetComponentInChildren<UIStrengtheningOK>(true)?.GetComponent<ButtonLinker>();
+							okBtn = parent.GetComponentInChildren<UIStrengtheningOK>(true);
 							if (okBtn == null) {
 								Log.LogError("Failed to find OK Button!");
-								return;
+								return false;
 							}
 							break;
 						}
 					default: {
 							Log.LogError("No SynthMode defined!");
-							return;
+							return false;
 						}
 				}
 
 				success = parent.GetComponentInChildren<UICraftSuccess>(true);
 				if (success == null) {
 					Log.LogError("Failed to find success Component!");
-					return;
+					return false;
 				}
 				cursor = parent.GetComponentInChildren<CursorController>(true);
 				if (cursor == null) {
 					Log.LogError("Failed to find cursor Component!");
-					return;
+					return false;
 				}
+
+				return true;
 			}
 
 			[HarmonyPatch(typeof(UICraftMenu), "Start")]
@@ -82,7 +85,6 @@ namespace FasterCrafting {
 			public static void StartCraft(UICraftMenu __instance) {
 				synthMode = SynthMode.CRAFT;
 				craftMenu = __instance;
-				canSkip = true;
 				Log.LogInfo("Starting crafting shorcut");
 			}
 
@@ -96,7 +98,6 @@ namespace FasterCrafting {
 				cursor = null;
 				lastSelect = null;
 				okBtn = null;
-				canSkip = false;
 				startSynthAnim = false;
 				doneUpgrade = false;
 				Log.LogInfo("Ending crafting shorcut");
@@ -107,7 +108,6 @@ namespace FasterCrafting {
 			public static void StartUpgrade(UIStrengthening __instance) {
 				synthMode = SynthMode.UPGRADE;
 				strengthMenu = __instance;
-				canSkip = true;
 				Log.LogInfo("Starting upgrade shorcut");
 			}
 
@@ -121,7 +121,6 @@ namespace FasterCrafting {
 				cursor = null;
 				lastSelect = null;
 				okBtn = null;
-				canSkip = false;
 				startSynthAnim = false;
 				doneUpgrade = false;
 				Log.LogInfo("Ending upgrade shorcut");
@@ -141,37 +140,33 @@ namespace FasterCrafting {
 			public static void ResultUpdate() {
 				if (success == null || cursor == null || okBtn == null) {
 					Log.LogInfo($"Something is missing");
-					TrytoSearch(synthMode);
-					return;
+					bool found = TrytoSearch(synthMode);
+					if (!found) return;
 				}
 
 				//success.IsDone() start at false
-				Log.LogInfo($"canSkip:{canSkip}\tresultplay:{craftResult.isPlaying}\tsuccess:{success.IsDone()}");
-
-				if ((craftResult.isPlaying || !success.IsDone()) && !canSkip) {
-					if (startSynthAnim == false) {
-						lastSelect = cursor?.NowFocusObject;
-					}
-					startSynthAnim = true;
-				}
-				//else if (!craftResult.isPlaying && success.IsDone() && !canSkip) { 
-				//	canSkip = true;
-				//}
-
-				if (!craftResult.isPlaying && success.IsDone()) {
-					canSkip = true;
-					if (startSynthAnim) {
-						startSynthAnim = false;
-						if (synthMode == SynthMode.UPGRADE) {
-							doneUpgrade = true;
-						}
-					}
-				}
-
+				//Log.LogInfo($"canSkip:{canSkip}\tresultplay:{craftResult.isPlaying}\tsuccess:{success.IsDone()}");
 				//Log.LogInfo($"cursor focus: {cursor.NowFocusObject.gameObject.name}\nok button: {okBtn.gameObject.name}");
 
-				if (doneUpgrade && lastSelect != null && cursor.NowFocusObject.gameObject.name == okBtn.gameObject.name) {
+				if (craftResult.isPlaying) {
+					startSynthAnim = true;
+				}
+				
+				if (!craftResult.isPlaying && startSynthAnim && success.isActiveAndEnabled) {
+					startSynthAnim = false;
+					startResultAnim = true;
+				}
+
+				if (!success.isActiveAndEnabled && startResultAnim) {
+					startResultAnim = false;
+					if (synthMode == SynthMode.UPGRADE) {
+						doneUpgrade = true;
+					}
+				}
+
+				if (doneUpgrade && lastSelect != null) {
 					doneUpgrade = false;
+					cursor.NextFocusObject = lastSelect;
 					cursor.NowFocusObject = lastSelect;
 					Log.LogInfo("Try to change back position");
 				}
@@ -180,16 +175,16 @@ namespace FasterCrafting {
 			[HarmonyPatch(typeof(GameMain), "Update")]
 			[HarmonyPostfix]
 			public static void InputUpdate() {
-				if (RF5Input.Pad.End(RF5Input.Key.PS) && canSkip && !startSynthAnim) {
+				if (RF5Input.Pad.End(RF5Input.Key.PS) && !startResultAnim && !startSynthAnim) {
 					if (synthMode == SynthMode.CRAFT && craftMenu != null) {
 						Log.LogInfo("Crafting...");
-						canSkip = false;
-						craftMenu.DoSynthesis(CraftManager.DualWorkType);
+						lastSelect = cursor?.NowFocusObject;
+						okBtn?.ButtonWork(RF5Input.Key.A);
 					}
 					else if (synthMode == SynthMode.UPGRADE && strengthMenu != null && !doneUpgrade) {
 						Log.LogInfo("Upgrading...");
-						canSkip = false;
-						strengthMenu.DoStrengthening();
+						lastSelect = cursor?.NowFocusObject;
+						okBtn?.ButtonWork(RF5Input.Key.A);
 					}
 				}
 			}
