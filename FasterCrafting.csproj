@@ -20,13 +20,13 @@
 
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>libs\Assembly-CSharp.stripped.dll</HintPath>
+      <HintPath>libs\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Il2Cppmscorlib">
-      <HintPath>libs\Il2Cppmscorlib.stripped.dll</HintPath>
+      <HintPath>libs\Il2Cppmscorlib.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>libs\UnityEngine.CoreModule.stripped.dll</HintPath>
+      <HintPath>libs\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
   </ItemGroup>
 

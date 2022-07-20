@@ -1,6 +1,7 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using BepInEx.IL2CPP;
+using UnityEngine;
 using HarmonyLib;
 
 namespace FasterCrafting {
@@ -172,7 +173,7 @@ namespace FasterCrafting {
 				}
 			}
 
-			[HarmonyPatch(typeof(GameMain), "Update")]
+			[HarmonyPatch(typeof(UIMainController), "Update")]
 			[HarmonyPostfix]
 			public static void InputUpdate() {
 				if (RF5Input.Pad.End(RF5Input.Key.PS) && !startResultAnim && !startSynthAnim) {
