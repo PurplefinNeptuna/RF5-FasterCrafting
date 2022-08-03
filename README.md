@@ -11,6 +11,7 @@
 - Pressing `[Camp Menu]` (default Keyboard = Tab, DS4 = Start) will make you pressing ok button instantly.
 - After upgrading item, it will try to move back the cursor (hand) back to item slot for the last item used.
 
+![easycraft](https://user-images.githubusercontent.com/23467102/182513190-f60a81ec-ebe0-4952-a77c-8550b0da42c8.gif)
 ![upgrade](https://user-images.githubusercontent.com/23467102/179445472-6eb14fc4-094a-4634-b35e-c324f96b29fe.gif)
 
 
