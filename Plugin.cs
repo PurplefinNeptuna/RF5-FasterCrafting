@@ -3,6 +3,8 @@ using BepInEx.Logging;
 using BepInEx.IL2CPP;
 using UnityEngine;
 using HarmonyLib;
+using UnhollowerRuntimeLib;
+using System.Collections.Generic;
 
 namespace FasterCrafting {
 	[BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
@@ -16,6 +18,7 @@ namespace FasterCrafting {
 			Log.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
 
 			Harmony.CreateAndPatchAll(typeof(FasterCraft));
+			Harmony.CreateAndPatchAll(typeof(Warper));
 		}
 
 		public enum SynthMode {
@@ -152,7 +155,7 @@ namespace FasterCrafting {
 				if (craftResult.isPlaying) {
 					startSynthAnim = true;
 				}
-				
+
 				if (!craftResult.isPlaying && startSynthAnim && success.isActiveAndEnabled) {
 					startSynthAnim = false;
 					startResultAnim = true;
@@ -187,6 +190,30 @@ namespace FasterCrafting {
 						lastSelect = cursor?.NowFocusObject;
 						okBtn?.ButtonWork(RF5Input.Key.A);
 					}
+				}
+			}
+		}
+
+		[HarmonyPatch]
+		public class Warper {
+			[HarmonyPatch(typeof(UICraftMenu), nameof(UICraftMenu.CanRequestCraftNum))]
+			[HarmonyPostfix]
+			public static void CanRequestPatch(UICraftMenu __instance, ref bool __result) {
+				if (__instance.CraftNum == 1 || __instance.CraftNum == __instance.CraftNumMax) {
+					__result = true;
+				}
+			}
+
+			[HarmonyPatch(typeof(UICraftMenu), nameof(UICraftMenu.RequestCraftNum))]
+			[HarmonyPrefix]
+			public static void RequestPatch(UICraftMenu __instance, ref bool isLeft) {
+				if (__instance.CraftNum == 1 && isLeft) {
+					__instance.CraftNum = __instance.CraftNumMax;
+					isLeft = false;
+				}
+				else if (__instance.CraftNum == __instance.CraftNumMax && !isLeft) {
+					__instance.CraftNum = 1;
+					isLeft = true;
 				}
 			}
 		}
