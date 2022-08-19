@@ -1,10 +1,7 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
-using BepInEx.IL2CPP;
-using UnityEngine;
+using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
-using UnhollowerRuntimeLib;
-using System.Collections.Generic;
 
 namespace FasterCrafting {
 	[BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
